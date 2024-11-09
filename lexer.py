@@ -58,6 +58,23 @@ class Lexer:
             elif ch == ';': self.add_token(TOK_SEMICOLON)
             elif ch == '?': self.add_token(TOK_QUESTION)
             elif ch == '%': self.add_token(TOK_MOD)
+            elif ch == '=':
+                if self.match('='): self.add_token(TOK_EQ)
+            elif ch == '~':
+                if self.match('='): self.add_token(TOK_NE)
+                else: self.add_token(TOK_NOT)
+            elif ch == '<':
+                if self.match('='): self.add_token(TOK_LE)
+                # elif self.match('<'): self.add_token(TOK_SHL)
+                else: self.add_token(TOK_LT)
+            elif ch == '>':
+                if self.match('='): self.add_token(TOK_GE)
+                # elif self.match('>'): self.add_token(TOK_SHR)
+                else: self.add_token(TOK_GT)
+            elif ch == ':':
+                if self.match(':'): self.add_token(TOK_COLON)
+                else: self.add_token(TOK_ASSIGN)
+
 
         # self.add_token(TOK_EOF)
         return self.tokens

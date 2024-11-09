@@ -62,4 +62,4 @@ class Token:
         self.line = line
 
     def __repr__(self):
-        return f"Token({self.token_type}, '{self.lexeme}')"
+        return f"Token({self.token_type}, '{self.lexeme}, {self.line})"
