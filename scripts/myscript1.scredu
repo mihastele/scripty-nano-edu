@@ -5,6 +5,15 @@ x := 8.23
 
 if x >= 0 then
   println('x is positive')
+  3 - -3.223
+
+  4 / 5
 else
   println('x is negative')
 end
+
+/*
+
+that is all folks
+
+*/

@@ -72,6 +72,14 @@ class Lexer:
         while self.curr < len(self.source):
             self.start = self.curr
             ch = self.advance()
+            # print(f"Current character: {ch}")
+            # print(f"Current line: {self.line}")
+            # print(f"next character: {self.lookahead()}")
+
+            if ch == '/':
+                print(f"character: {ch}")
+                print(f"Look ahead { self.lookahead() }")
+
             if ch == '\n': self.line = self.line + 1
             elif ch == ' ': pass
             elif ch == '\t': pass
@@ -93,7 +101,21 @@ class Lexer:
                     self.add_token(TOK_MINUS)
             elif ch == '*': self.add_token(TOK_STAR)
             elif ch == '^': self.add_token(TOK_CARET)
-            elif ch == '/': self.add_token(TOK_SLASH)
+            elif ch == '/':
+                if self.peek() == '*':  # Use peek() instead of lookahead()
+                    self.advance()  # Consume the '*'
+                    while True:
+                        if self.curr >= len(self.source):
+                            raise SyntaxError(f"Unterminated comment on line {self.line}")
+                        if self.peek() == '*' and self.lookahead() == '/':
+                            self.advance()  # Consume the '*'
+                            self.advance()  # Consume the '/'
+                            break
+                        if self.peek() == '\n':
+                            self.line += 1
+                        self.advance()
+                else:
+                    self.add_token(TOK_SLASH)
             elif ch == ';': self.add_token(TOK_SEMICOLON)
             elif ch == '?': self.add_token(TOK_QUESTION)
             elif ch == '%': self.add_token(TOK_MOD)
@@ -119,6 +141,8 @@ class Lexer:
                 self.handle_number()
             elif ch.isalpha() or ch == '_':
                 self.handle_identifier()
+            else:
+                raise SyntaxError(f"Unexpected character '{ch}' on line {self.line}")
                 
 
 
