@@ -19,6 +19,7 @@ class Lexer:
         return self.source[self.curr]
 
     def lookahead(self, n=1):
+        # print(f"Looking ahead {n} characters: { self.source[self.curr + n]}")
         if self.curr + n >= len(self.source):
             return '\0'
         return self.source[self.curr + n]
@@ -55,7 +56,13 @@ class Lexer:
     def handle_identifier(self):
         while self.peek().isalnum() or self.peek() == '_':
             self.advance()
-        self.add_token(TOK_IDENTIFIER)
+        # check if identifier matches a keyword
+        key = self.source[self.start:self.curr]
+        keyword_type = keywords.get(key, None)
+        if keyword_type is None:
+            self.add_token(TOK_IDENTIFIER)
+        else:
+            self.add_token(keyword_type)
 
     def add_token(self, token_type):
         self.tokens.append(Token(token_type, self.source[self.start:self.curr], self.line))
@@ -69,9 +76,6 @@ class Lexer:
             elif ch == ' ': pass
             elif ch == '\t': pass
             elif ch == '\r': pass
-            elif ch == '#':
-                while self.peek() != '\n':
-                    self.advance()
             elif ch == '(': self.add_token(TOK_LPAREN)
             elif ch == ')': self.add_token(TOK_RPAREN)
             elif ch == '{': self.add_token(TOK_LCURLY)
@@ -81,7 +85,12 @@ class Lexer:
             elif ch == '.': self.add_token(TOK_DOT)
             elif ch == ',': self.add_token(TOK_COMMA)
             elif ch == '+': self.add_token(TOK_PLUS)
-            elif ch == '-': self.add_token(TOK_MINUS)
+            elif ch == '-':
+                if self.match('-'):
+                    while self.peek() != '\n' and not (self.curr >= len(self.source)):
+                        self.advance()
+                else:
+                    self.add_token(TOK_MINUS)
             elif ch == '*': self.add_token(TOK_STAR)
             elif ch == '^': self.add_token(TOK_CARET)
             elif ch == '/': self.add_token(TOK_SLASH)
