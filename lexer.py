@@ -14,9 +14,13 @@ class Lexer:
         return ch
     
     def peek(self):
+        if self.curr >= len(self.source):
+            return '\0'
         return self.source[self.curr]
 
     def lookahead(self, n=1):
+        if self.curr + n >= len(self.source):
+            return '\0'
         return self.source[self.curr + n]
 
     def match(self, expected):
@@ -27,6 +31,32 @@ class Lexer:
         self.curr = self.curr + 1 # If it is a match, we also consume that char
         return True
     
+    def handle_number(self):
+        while self.peek().isdigit():
+            self.advance()
+        if self.peek() == '.' and self.lookahead().isdigit():
+            self.advance()
+            while self.peek().isdigit():
+                self.advance()
+            self.add_token(TOK_FLOAT)
+        else:
+            self.add_token(TOK_INTEGER) # everything will be double, but just for tokenizing
+
+    def handle_string(self, start_quote):
+        while self.peek() != start_quote:
+            if self.curr >= len(self.source):
+                raise SyntaxError("Unterminated string")
+            # if self.peek() == '\\':
+            #     self.advance()
+            self.advance()
+        self.advance() # consume the closing quote
+        self.add_token(TOK_STRING)
+
+    def handle_identifier(self):
+        while self.peek().isalnum() or self.peek() == '_':
+            self.advance()
+        self.add_token(TOK_IDENTIFIER)
+
     def add_token(self, token_type):
         self.tokens.append(Token(token_type, self.source[self.start:self.curr], self.line))
 
@@ -74,6 +104,14 @@ class Lexer:
             elif ch == ':':
                 if self.match(':'): self.add_token(TOK_COLON)
                 else: self.add_token(TOK_ASSIGN)
+            elif ch == '"' or ch == '\'':
+                self.handle_string(ch)
+            elif ch.isdigit():
+                self.handle_number()
+            elif ch.isalpha() or ch == '_':
+                self.handle_identifier()
+                
+
 
 
         # self.add_token(TOK_EOF)
