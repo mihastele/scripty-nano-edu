@@ -61,8 +61,8 @@ class Parser:
     def unary(self):
         if self.match(TOK_NOT) or self.match(TOK_MINUS) or self.match(TOK_PLUS):
             op = self.previous_token()
-        operand = self.unary()
-        return UnOp(op, operand)
+            operand = self.unary()
+            return UnOp(op, operand)
         return self.primary()
 
     # <factor>  ::=  <unary>
@@ -74,8 +74,9 @@ class Parser:
         expr = self.factor()
         while self.match(TOK_STAR) or self.match(TOK_SLASH):
             op = self.previous_token()
-        right = self.factor()
-        expr = BinOp(op, expr, right)
+            right = self.factor()
+            # print(f"Binary operation: {op.lexeme}")
+            expr = BinOp(op, expr, right)
         return expr
 
     # <expr>  ::=  <term> ( ('+'|'-') <term> )*
@@ -83,8 +84,8 @@ class Parser:
         expr = self.term()
         while self.match(TOK_PLUS) or self.match(TOK_MINUS):
             op = self.previous_token()
-        right = self.term()
-        expr = BinOp(op, expr, right)
+            right = self.term()
+            expr = BinOp(op, expr, right)
         return expr
 
     def parse(self):
