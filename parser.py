@@ -5,6 +5,46 @@ class Parser:
         self.tokens = tokens
         self.curr = 0
         # parser with one lookahead
+    
+    
+    def advance(self):
+        token = self.peek()
+        self.curr += 1
+        return token
+    
+    def peek(self):
+        if self.curr < len(self.tokens):
+            return self.tokens[self.curr]
+        return None
+
+    
+    def is_next(self, expected_type):
+        if self.curr >= len(self.tokens):
+            return False
+        return self.peek().token_type == expected_type
+
+    def expect(self, expected_type):
+        if self.curr >= len(self.tokens):
+            raise SyntaxError(f"Found {self.previous_token.lexeme!r} at the end of parsing.")
+        elif self.peek().token_type == expected_type:
+            token = self.advance()
+            return token
+        else:
+            raise SyntaxError(f"Expected {expected_type!r}, found {self.previous_token().lexeme!r}.")
+
+    def match(self, expected_type):
+        if self.curr >= len(self.tokens):
+            return False
+        if self.peek().token_type != expected_type:
+            return False
+        self.advance()
+        return True
+
+    def previous_token(self):
+        if self.curr > 0:
+            return self.tokens[self.curr - 1]
+        return None
+
 
         # <primary>  ::=  <integer> | <float> | '(' <expr> ')'
     def primary(self):
