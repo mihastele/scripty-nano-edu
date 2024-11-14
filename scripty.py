@@ -3,6 +3,7 @@ from tokens import *
 from lexer import *
 from parser import *
 from utils import *
+from interpreter import *
 
 if __name__ == "__main__":
     if(len(sys.argv) < 2):
@@ -22,3 +23,7 @@ if __name__ == "__main__":
         print(f"{Colors.GREEN}Parsed AST:{Colors.WHITE}")
         ast = Parser(tokens).parse()
         print_pretty_ast(str(ast))
+
+        interpreter = Interpreter()
+        for_now = interpreter.interpret(ast)
+        print('for now: ', for_now)
