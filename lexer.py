@@ -1,4 +1,5 @@
 from tokens import *
+from utils import *
 
 class Lexer:
     def __init__(self, source):
@@ -46,7 +47,7 @@ class Lexer:
     def handle_string(self, start_quote):
         while self.peek() != start_quote:
             if self.curr >= len(self.source):
-                raise SyntaxError(f"Unterminated string on line {self.line}")
+                lexing_error(f"Unterminated string on line {self.line}")
             # if self.peek() == '\\':
             #     self.advance()
             self.advance()

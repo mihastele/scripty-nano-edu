@@ -14,11 +14,11 @@ if __name__ == "__main__":
         source = file.read()
         # print(f"Source code:\n{source}")
 
-        print("LEXER:")
+        print(f"{Colors.GREEN}LEXER:{Colors.WHITE}")
         tokens = Lexer(source).tokenize()
         for token in tokens:
             print(token)
 
-        print("Parsed AST:")
+        print(f"{Colors.GREEN}Parsed AST:{Colors.WHITE}")
         ast = Parser(tokens).parse()
-        print_pretty_ast(ast)
+        print_pretty_ast(str(ast))
