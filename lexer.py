@@ -107,7 +107,7 @@ class Lexer:
                     self.advance()  # Consume the '*'
                     while True:
                         if self.curr >= len(self.source):
-                            raise SyntaxError(f"Unterminated comment on line {self.line}")
+                            lexing_error(f"Unterminated comment", self.line)
                         if self.peek() == '*' and self.lookahead() == '/':
                             self.advance()  # Consume the '*'
                             self.advance()  # Consume the '/'
@@ -144,7 +144,7 @@ class Lexer:
             elif ch.isalpha() or ch == '_':
                 self.handle_identifier()
             else:
-                raise SyntaxError(f"Unexpected character '{ch}' on line {self.line}")
+                lexing_error(f"Unexpected character '{ch}'", self.line)
                 
 
 
