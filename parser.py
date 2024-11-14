@@ -47,10 +47,13 @@ class Parser:
         return None
 
 
-        # <primary>  ::=  <integer> | <float> | '(' <expr> ')'
+        # <primary>  ::=  <integer> | <float> | <bool> | <string> | '(' <expr> ')'
     def primary(self):
         if self.match(TOK_INTEGER): return Integer(int(self.previous_token().lexeme), line=self.previous_token().line)
         if self.match(TOK_FLOAT): return Float(float(self.previous_token().lexeme), line=self.previous_token().line)
+        if self.match(TOK_TRUE): return Bool(bool(True), line=self.previous_token().line)
+        if self.match(TOK_FALSE): return Bool(bool(False), line=self.previous_token().line)
+        if self.match(TOK_STRING): return String(self.previous_token().lexeme[1:-1], line=self.previous_token().line)
         if self.match(TOK_LPAREN):
             expr = self.expr()
             if (not self.match(TOK_RPAREN)):
@@ -75,7 +78,7 @@ class Parser:
             op = self.previous_token()
             right = self.unary()
             # print(f"Binary operation: {op.lexeme}")
-            expr = BinOp(op, expr, right, self.peek().line)
+            expr = BinOp(op, expr, right, self.previous_token().line)
         return expr
 
     # <addition>  ::=  <multiplication> ( ('+'|'-') <multiplication> )*
@@ -84,7 +87,7 @@ class Parser:
         while self.match(TOK_PLUS) or self.match(TOK_MINUS):
             op = self.previous_token()
             right = self.multiplication()
-            expr = BinOp(op, expr, right, self.peek().line)
+            expr = BinOp(op, expr, right, self.previous_token().line)
         return expr
     
     def expr(self):

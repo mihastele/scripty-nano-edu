@@ -44,6 +44,30 @@ class Float(Expr):
         return f'Float[{self.value}]'
 
 
+class Bool(Expr):
+    '''
+    Example: true
+    '''
+    def __init__(self, value, line):
+        assert isinstance(value, bool), value
+        self.value = value
+        self.line = line
+
+    def __repr__(self):
+        return f'Bool[{self.value}]'
+
+class String(Expr):
+    '''
+    Example: "Hello, World!"
+    '''
+    def __init__(self, value, line):
+        assert isinstance(value, str), value
+        self.value = value
+        self.line = line
+        
+    def __repr__(self):
+        return f'String[{self.value}]'
+
 class UnOp(Expr):
     '''
     Example: -operand
