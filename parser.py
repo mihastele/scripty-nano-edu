@@ -147,7 +147,46 @@ class Parser:
 
     def expr(self):
         return self.logical_or()
+    
+    # <print_stmt> ::= "print" <expr>
+    def print_stmt(self):
+        if self.match(TOK_PRINT):
+            val = self.expr()
+            # prev token because of match
+            return PrintStmt(val, line=self.previous_token().line)
 
+
+
+    def stmt(self):
+        #predictive parsing
+        if self.peek().token_type == TOK_PRINT:
+            return self.print_stmt()
+        elif self.peek().token_type == TOK_IF:
+            return self.if_stmt()
+        elif self.peek().token_type == TOK_WHILE:
+            return self.while_stmt()
+        elif self.peek().token_type == TOK_FOR:
+            return self.for_stmt()
+        elif self.peek().token_type == TOK_FUNC:
+            return self.func_stmt()
+        else:
+            pass
+
+
+    
+    def stmts(self):
+        stmts = []
+        while self.curr < len(self.tokens):
+            stmt = self.stmt()
+            print(f"Parsed {stmt}")  # for debugging purposes, print the parsed statement
+            stmts.append(stmt)
+        return Stmts(stmts, line=self.previous_token().line)
+    
+    def program(self):
+        stmts = self.stmts()
+        # print("HIII")
+        return stmts
+    
     def parse(self):
-        ast = self.expr()
+        ast = self.program()
         return ast

@@ -25,5 +25,4 @@ if __name__ == "__main__":
         print_pretty_ast(str(ast))
 
         interpreter = Interpreter()
-        for_now = interpreter.interpret(ast)
-        print('for now: ', for_now)
+        interpreter.interpret(ast)
