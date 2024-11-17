@@ -165,3 +165,13 @@ class Interpreter:
         elif isinstance(node, PrintStmt):
             exprtype, exprval = self.interpret(node.value)
             print(codecs.escape_decode(bytes(str(exprval), 'utf-8'))[0].decode('utf-8'), end=node.end)
+
+        elif isinstance(node, IfStmt):
+            testtype, testval = self.interpret(node.test)
+            if testtype != TYPE_BOOL:
+                runtime_error(f'Expected boolean value, got {testtype}.', node.test.line)
+            if testval:
+                self.interpret(node.then_stmts)
+            else:
+                if node.else_stmts:
+                    self.interpret(node.else_stmts)

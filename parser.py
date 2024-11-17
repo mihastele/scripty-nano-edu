@@ -154,7 +154,19 @@ class Parser:
             val = self.expr()
             # prev token because of match
             return PrintStmt(val, end, line=self.previous_token().line)
-
+        
+    def if_stmt(self):
+        self.expect(TOK_IF)
+        test = self.expr()
+        self.expect(TOK_THEN)
+        then_stmts = self.stmts()
+        if self.is_next(TOK_ELSE):
+            self.advance() # Consume the else token
+            else_stmts = self.stmts()
+        else:
+            else_stmts = None
+        self.expect(TOK_END)
+        return IfStmt(test, then_stmts, else_stmts, line=self.previous_token().line)
 
 
     def stmt(self):
@@ -178,9 +190,10 @@ class Parser:
     
     def stmts(self):
         stmts = []
-        while self.curr < len(self.tokens):
+        # loop all statements of the current block
+        while self.curr < len(self.tokens) and not self.is_next(TOK_ELSE) and not self.is_next(TOK_END):
             stmt = self.stmt()
-            print(f"Parsed {stmt}")  # for debugging purposes, print the parsed statement
+            # print(f"Parsed {stmt}")  # for debugging purposes, print the parsed statement
             stmts.append(stmt)
         return Stmts(stmts, line=self.previous_token().line)
     
