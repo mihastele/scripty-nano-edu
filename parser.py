@@ -57,7 +57,7 @@ class Parser:
             return Bool(False, line=self.previous_token().line)
         elif self.match(TOK_STRING):
             return String(str(self.previous_token().lexeme[1:-1]),
-                          line=self.previous_token().line)  # Remove the quotes at the beginning and at the end of the lexeme
+                        line=self.previous_token().line)  # Remove the quotes at the beginning and at the end of the lexeme
         elif self.match(TOK_LPAREN):
             expr = self.expr()
             if (not self.match(TOK_RPAREN)):
