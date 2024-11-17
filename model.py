@@ -161,13 +161,14 @@ class PrintStmt(Stmt):
     Example: print value 
     '''
 
-    def __init__(self, expr: Expr, line):
-        assert isinstance(expr, Expr), expr
-        self.expr = expr
+    def __init__(self, value: Expr, end, line):
+        assert isinstance(value, Expr), value
+        self.value = value
         self.line = line
+        self.end = end
 
     def __repr__(self):
-        return f'PrintStmt({self.expr})'
+        return f'PrintStmt({self.value}, end={self.end!r})'
     
 
 class WhileStmt(Stmt):
