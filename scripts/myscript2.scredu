@@ -2,6 +2,9 @@ println 2 + 2 + 3
 println  2 -1
 println 2^9
 
+x := 3
+x := x + 2
+
 if 5 > 2 then
    println("Entered the consequence")
 else

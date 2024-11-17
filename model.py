@@ -50,6 +50,7 @@ class Float(Expr):
         return f'Float[{self.value}]'
 
 
+
 class Bool(Expr):
     '''
     Example: true, false
@@ -129,6 +130,17 @@ class LogicalOp(Expr):
     def __repr__(self):
         return f'LogicalOp({self.op.lexeme!r}, {self.left}, {self.right})'
 
+class Identifier(Expr):
+    '''
+    Example: x, PI, _score, numLives, start_vel
+    '''
+    def __init__(self, name: str, line):
+        assert isinstance(name, str), name
+        self.name = name
+        self.line = line
+    
+    def __repr__(self):
+        return f'Identifier({self.name})'
 
 class Grouping(Expr):
     '''
@@ -192,8 +204,22 @@ class WhileStmt(Stmt):
 
 
 class Assignment(Stmt):
-    # TODO:
-    pass
+    '''
+    left := right
+    x := 10 + 32 * (3 - y)
+    x[1] := 22
+    obj.name := "Mario"
+    vel := 3.4
+    '''
+    def __init__(self, left: Expr, right: Expr, line):
+        assert isinstance(left, Expr), left
+        assert isinstance(right, Expr), right
+        self.left = left
+        self.right = right
+        self.line = line
+
+    def __repr__(self):
+        return f'Assignment({self.left}, {self.right})'
 
 class ForStmt(Stmt):
     # TODO:

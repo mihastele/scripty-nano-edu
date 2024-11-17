@@ -45,6 +45,7 @@ class Parser:
     #              |  <float>
     #              |  <bool>
     #              |  <string>
+    #              |  <identifier>
     #              | '(' <expr> ')'
     def primary(self):
         if self.match(TOK_INTEGER):
@@ -64,6 +65,9 @@ class Parser:
                 parse_error(f'Error: ")" expected.', self.previous_token().line)
             else:
                 return Grouping(expr, line=self.previous_token().line)
+        else:
+            identifier = self.expect(TOK_IDENTIFIER)
+            return Identifier(identifier.lexeme, line=self.previous_token().line)
 
     # <unary>  ::=  ('+'|'-'|'~') <unary>  |  <primary>
     def unary(self):
@@ -184,7 +188,13 @@ class Parser:
         elif self.peek().token_type == TOK_FUNC:
             return self.func_stmt()
         else:
-            pass
+            left = self.expr()
+            if self.match(TOK_ASSIGN):
+                right = self.expr()
+                return Assignment(left, right, line=left.line)
+            else:
+                pass
+
 
 
     

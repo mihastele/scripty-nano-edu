@@ -135,8 +135,7 @@ class Lexer:
                 # elif self.match('>'): self.add_token(TOK_SHR)
                 else: self.add_token(TOK_GT)
             elif ch == ':':
-                if self.match(':'): self.add_token(TOK_COLON)
-                else: self.add_token(TOK_ASSIGN)
+                self.add_token(TOK_ASSIGN if self.match('=') else TOK_COLON)
             elif ch == '"' or ch == '\'':
                 self.handle_string(ch)
             elif ch.isdigit():
