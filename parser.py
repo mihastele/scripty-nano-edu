@@ -162,7 +162,7 @@ class Parser:
         if self.peek().token_type == TOK_PRINT:
             return self.print_stmt(end='')
         elif self.peek().token_type == TOK_PRINTLN:
-            return self.return_stmt(end='\n')
+            return self.print_stmt(end='\n')
         elif self.peek().token_type == TOK_IF:
             return self.if_stmt()
         elif self.peek().token_type == TOK_WHILE:
