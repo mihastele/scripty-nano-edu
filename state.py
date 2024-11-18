@@ -4,7 +4,13 @@ class Environment:
         self.parent = parent  # reference to the parent environment
 
     def get_var(self, name):
-        return self.vars.get(name, None)  # return None if variable not found in the environment
+        while self:
+            value = self.vars.get(name)  # get the value of the variable from the current environment
+            if value is not None:
+                return value  # return the value if found
+            else:
+                self = self.parent  # move up to the parent environment
+        return None  # return None if the variable is not found in any environment
 
     def set_var(self, name, value):
         self.vars[name] = value
