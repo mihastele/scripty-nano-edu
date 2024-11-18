@@ -13,7 +13,14 @@ class Environment:
         return None  # return None if the variable is not found in any environment
 
     def set_var(self, name, value):
-        self.vars[name] = value
+        original_env = self  # save the current environment
+        while self:
+            if name in self.vars:
+                self.vars[name] = value  # update the value in the current environment
+                return value
+            self = self.parent  # move up to the parent environment
+        original_env.vars[name] = value
+        return value  # return the updated value if the variable is not found in any environment
 
     def new_env(self):
         '''
