@@ -20,3 +20,5 @@ end
 if 5 == 2 then
    println("Entered the consequence")
 end
+
+print("Value of x is: " + x)

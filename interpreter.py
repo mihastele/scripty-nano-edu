@@ -30,7 +30,7 @@ class Interpreter:
             return self.interpret(node.value, env)
         
         elif isinstance(node, Identifier):
-            value = env.get(node.name)
+            value = env.get_var(node.name)
             if value is None:
                 runtime_error(f'Undefined variable {node.name!r}.', node.line)
             if value[1] is None:
@@ -40,9 +40,9 @@ class Interpreter:
         elif isinstance(node, Assignment):
             # left := right
             # Eval right
-            righttype, rightval = self.interpret(node.value, env)
-            # varval = env.get(node.left.name)
-            env.set_val(node.left.name, (righttype, rightval))
+            righttype, rightval = self.interpret(node.right, env)
+            # varval = env.get_var(node.left.name)
+            env.set_var(node.left.name, (righttype, rightval))
 
 
         elif isinstance(node, BinOp):

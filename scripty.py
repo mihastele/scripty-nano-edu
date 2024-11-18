@@ -25,4 +25,4 @@ if __name__ == "__main__":
         print_pretty_ast(str(ast))
 
         interpreter = Interpreter()
-        interpreter.interpret(ast)
+        interpreter.interpret_ast(ast)
