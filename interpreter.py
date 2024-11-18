@@ -39,10 +39,8 @@ class Interpreter:
 
         elif isinstance(node, Assignment):
             # left := right
-
             # Eval right
             righttype, rightval = self.interpret(node.value, env)
-
             # varval = env.get(node.left.name)
             env.set_val(node.left.name, (righttype, rightval))
 
