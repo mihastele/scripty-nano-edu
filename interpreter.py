@@ -192,6 +192,16 @@ class Interpreter:
             else:
                 if node.else_stmts:
                     self.interpret(node.else_stmts, env.new_env())
+        
+        elif isinstance(node, WhileStmt):
+            new_env = env.new_env()
+            while True:
+                testtype, testval = self.interpret(node.test, new_env)
+                if testtype!= TYPE_BOOL:
+                    runtime_error(f'Expected boolean value, got {testtype}.', node.test.line)
+                if not testval:
+                    break
+                self.interpret(node.body_stmts, new_env)
 
 
     def interpret_ast(self, node):

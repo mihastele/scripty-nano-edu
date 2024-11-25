@@ -199,8 +199,19 @@ class IfStmt(Stmt):
         return f'IfStmt(test={self.test}, then_stmts={self.then_stmts}, else_stmts={self.else_stmts})'
 
 class WhileStmt(Stmt):
-    # TODO:
-    pass
+    '''
+    "while" <expr> "do" <body_stmts> "end"
+    '''
+    def __init__(self, test, body_stmts, line):
+        assert isinstance(test, Expr), test
+        assert isinstance(body_stmts, Stmts), body_stmts
+        self.test = test
+        self.body_stmts = body_stmts
+        self.line = line
+    
+    def __repr__(self):
+        return f'WhileStmt(test={self.test}, body_stmts={self.body_stmts})'
+    
 
 
 class Assignment(Stmt):

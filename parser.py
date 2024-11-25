@@ -172,6 +172,13 @@ class Parser:
         self.expect(TOK_END)
         return IfStmt(test, then_stmts, else_stmts, line=self.previous_token().line)
 
+    def while_stmt(self):
+        self.expect(TOK_WHILE)
+        test = self.expr()
+        self.expect(TOK_DO)
+        body = self.stmts()
+        self.expect(TOK_END)
+        return WhileStmt(test, body, line=self.previous_token().line)
 
     def stmt(self):
         #predictive parsing

@@ -21,4 +21,18 @@ if 5 == 2 then
    println("Entered the consequence")
 end
 
+if 5 > 2 then
+   y := x + 3
+   println("Entered the consequence, global x is " + x)
+else
+   print("Error y not defined:" + y)
+   println("Entered alternative")
+end
 print("Value of x is: " + x)
+
+
+i := 1
+while i <= 10 do
+    print("i = " + i)
+    i := i + 1
+end
