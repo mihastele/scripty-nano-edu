@@ -28,11 +28,19 @@ else
    print("Error y not defined:" + y)
    println("Entered alternative")
 end
-print("Value of x is: " + x)
+println("Value of x is: " + x)
 
 
 i := 1
 while i <= 10 do
-    print("i = " + i)
+    println("i = " + i)
     i := i + 1
+end
+
+for num := 1, 10, 2 do
+    println("num =" + num)
+end
+
+for num := 8, 5 do
+    println("num =" + num)
 end

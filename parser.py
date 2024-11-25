@@ -179,6 +179,24 @@ class Parser:
         body = self.stmts()
         self.expect(TOK_END)
         return WhileStmt(test, body, line=self.previous_token().line)
+    
+    def for_stmt(self):
+        self.expect(TOK_FOR)
+        Identifier = self.primary()
+        self.expect(TOK_ASSIGN)
+        start = self.expr()
+        self.expect(TOK_COMMA)
+        end = self.expr()
+        if(self.match(TOK_COMMA)):
+            # Using match which consumes, in case of is_next # self.advance() # Consume the comma token
+            step = self.expr()
+        else:
+            step = None
+        self.expect(TOK_DO)  # Consume the do token. This should be the start of the block for the for loop's body.
+        body_stmts = self.stmts()
+        self.expect(TOK_END)  # Consume the end token. This should be the end of the for loop's body.
+        return ForStmt(Identifier, start, end, step, body_stmts, line=self.previous_token().line)
+
 
     def stmt(self):
         #predictive parsing

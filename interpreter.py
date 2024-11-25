@@ -203,6 +203,32 @@ class Interpreter:
                     break
                 self.interpret(node.body_stmts, new_env)
 
+        elif isinstance(node, ForStmt):
+            varname = node.ident.name
+            ltype, i = self.interpret(node.start, env)
+            endtype, end = self.interpret(node.end, env)
+            block_new_env = env.new_env()
+            if i < end:
+                if node.step is None:
+                    step = 1
+                else:
+                    step_type, step = self.interpret(node.step, env)
+                while i <= end:
+                    newval = (TYPE_NUMBER, i)
+                    block_new_env.set_var(varname, newval)
+                    self.interpret(node.body_stmts, block_new_env)
+                    i += step
+            else:
+                if node.step is None:
+                    step = -1
+                else:
+                    step_type, step = self.interpret(node.step, env)
+                while i >= end:
+                    newval = (TYPE_NUMBER, i)
+                    block_new_env.set_var(varname, newval)
+                    self.interpret(node.body_stmts, block_new_env)
+                    i += step
+
 
     def interpret_ast(self, node):
         # Entrypoint with global environment

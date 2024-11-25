@@ -212,7 +212,26 @@ class WhileStmt(Stmt):
     def __repr__(self):
         return f'WhileStmt(test={self.test}, body_stmts={self.body_stmts})'
     
+class ForStmt(Stmt):
+    '''
+    "for" <identifier> := <start> "," <end> ("," <increment>)? "do" <body_stmts> "end"
+    '''
 
+    def __init__(self, ident,  start: Expr, end: Expr, step: Expr, body_stmts, line):
+        assert isinstance(ident, Identifier), ident
+        assert isinstance(start, Expr), start
+        assert isinstance(end, Expr), end
+        assert isinstance(step, Expr) or step is None, step
+        assert isinstance(body_stmts, Stmts), body_stmts
+        self.ident = ident  # Identifier instance, not str
+        self.start = start
+        self.end = end
+        self.step = step
+        self.body_stmts = body_stmts
+        self.line = line
+
+        def __repr__(self):
+            return f'ForStmt(ident={self.ident}, start={self.start}, end={self.end}, step={self.step}, body_stmts={self.body_stmts})'
 
 class Assignment(Stmt):
     '''
@@ -232,6 +251,4 @@ class Assignment(Stmt):
     def __repr__(self):
         return f'Assignment({self.left}, {self.right})'
 
-class ForStmt(Stmt):
-    # TODO:
-    pass
+
