@@ -52,7 +52,7 @@ class Interpreter:
                 if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
                     return (TYPE_NUMBER, leftval + rightval)
                 elif lefttype == TYPE_STRING or righttype == TYPE_STRING:
-                    return (TYPE_STRING, str(leftval) + str(rightval))
+                    return (TYPE_STRING, stringify(leftval) + stringify(rightval))
                 else:
                     runtime_error(f'Unsupported operator {node.op.lexeme!r} between {lefttype} and {righttype}.',
                                 node.op.line)
@@ -181,7 +181,8 @@ class Interpreter:
 
         elif isinstance(node, PrintStmt):
             exprtype, exprval = self.interpret(node.value, env)
-            print(codecs.escape_decode(bytes(str(exprval), 'utf-8'))[0].decode('utf-8'), end=node.end)
+            val = stringify(exprval)
+            print(codecs.escape_decode(bytes(str(val), 'utf-8'))[0].decode('utf-8'), end=node.end)
 
         elif isinstance(node, IfStmt):
             testtype, testval = self.interpret(node.test, env)

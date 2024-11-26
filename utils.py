@@ -21,6 +21,16 @@ def print_pretty_ast(ast_text):
             print(ch, end='')
             newline = False
 
+def stringify(val):
+    if isinstance(val, bool) and val:
+        return 'true'
+    elif isinstance(val, bool):
+        return 'false'
+    elif isinstance(val, float) and val.is_integer():
+        return str(int(val))
+    else:
+        return str(val)
+
 def lexing_error(message, lineno):
     print(f"{Colors.RED}Error at line {lineno}: {message}{Colors.WHITE}")
     sys.exit(1)

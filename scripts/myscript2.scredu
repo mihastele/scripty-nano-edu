@@ -44,3 +44,9 @@ end
 for num := 8, 5 do
     println("num =" + num)
 end
+
+println(5.0)
+println(5.5)
+println(true)
+println(false)
+
