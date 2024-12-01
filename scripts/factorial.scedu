@@ -9,4 +9,10 @@ func factorial(n)
   println("The factorial of " + n + " is " + mul)
 end
 
+-- func factorial_rec(n)
+--    if
+
 factorial(5)
+-- factorial(5, 3 ,4)
+-- factorialabc(3)
+factorial(6)

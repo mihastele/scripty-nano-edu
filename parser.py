@@ -205,20 +205,24 @@ class Parser:
     # <params>  ::=  <identifier> ("," <identifier> )*
     def params(self):
         params = []
+        param_count = 0
         while not self.is_next(TOK_RPAREN):
-          name = self.expect(TOK_IDENTIFIER)
-          params.append(Param(name.lexeme, line=self.previous_token().line))
-          if not self.is_next(TOK_RPAREN):
-            self.expect(TOK_COMMA)
+            param_count += 1
+            if param_count > 255:
+                raise parse_error('Error: Maximum number of parameters exceeded.', self.previous_token().line)
+            name = self.expect(TOK_IDENTIFIER)
+            params.append(Param(name.lexeme, line=self.previous_token().line))
+            if not self.is_next(TOK_RPAREN):
+                self.expect(TOK_COMMA)
         return params
 
     def args(self):
         args = []
         while not self.is_next(TOK_RPAREN):
-          arg = self.expr()
-          args.append(arg)
-          if not self.is_next(TOK_RPAREN):
-            self.expect(TOK_COMMA)
+            arg = self.expr()
+            args.append(arg)
+            if not self.is_next(TOK_RPAREN):
+                self.expect(TOK_COMMA)
         return args
 
   # <func_decl>  ::=  "func" <name> "(" <params>? ")" <body_stmts> "end"
