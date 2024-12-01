@@ -5,6 +5,8 @@ from parser import *
 from utils import *
 from interpreter import *
 
+VERBOSE = False
+
 if __name__ == "__main__":
     if(len(sys.argv) < 2):
         raise SystemExit("Usage: python {} <file_path>".format(sys.argv[0]))
@@ -15,14 +17,14 @@ if __name__ == "__main__":
         source = file.read()
         # print(f"Source code:\n{source}")
 
-        print(f"{Colors.GREEN}LEXER:{Colors.WHITE}")
         tokens = Lexer(source).tokenize()
-        for token in tokens:
-            print(token)
-
-        print(f"{Colors.GREEN}Parsed AST:{Colors.WHITE}")
         ast = Parser(tokens).parse()
-        print_pretty_ast(str(ast))
+        if VERBOSE:
+            print(f"{Colors.GREEN}LEXER:{Colors.WHITE}")
+            for token in tokens:
+                print(token)
+            print(f"{Colors.GREEN}Parsed AST:{Colors.WHITE}")
+            print_pretty_ast(str(ast))
 
         interpreter = Interpreter()
         interpreter.interpret_ast(ast)
