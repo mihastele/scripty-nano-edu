@@ -302,3 +302,13 @@ class FuncCall(Expr):
     
     def __repr__(self):
         return f'FuncCall({self.name}, {self.args})'
+
+class FuncCallStmt(Stmt):
+    '''
+    A special type of statement to wrap FuncCall
+    '''
+    def __init__(self, expr: FuncCall):
+        assert isinstance(expr, FuncCall), expr
+        self.expr = expr
+    def __repr__(self):
+        return f'FuncCallStmt({self.expr})'

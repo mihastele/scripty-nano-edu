@@ -1,6 +1,7 @@
 class Environment:
     def __init__(self, parent=None):
         self.vars = {} # dictionary to store variables
+        self.funcs = {}  # dictionary to store functions
         self.parent = parent  # reference to the parent environment
 
     def get_var(self, name):
@@ -21,6 +22,19 @@ class Environment:
             self = self.parent  # move up to the parent environment
         original_env.vars[name] = value
         return value  # return the updated value if the variable is not found in any environment
+
+    def get_func(self, name):
+        while self:
+            value = self.funcs.get(name)
+            if value is not None:
+                return value  # return the function if found
+            else:
+                self = self.parent  # move up to the parent environment
+        return None  # return None if the function is not found in any environment
+
+    def set_func(self, name, value):
+        self.funcs[name] = value  # set the function in the current environment
+
 
     def new_env(self):
         '''

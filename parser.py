@@ -67,7 +67,12 @@ class Parser:
                 return Grouping(expr, line=self.previous_token().line)
         else:
             identifier = self.expect(TOK_IDENTIFIER)
-            return Identifier(identifier.lexeme, line=self.previous_token().line)
+            if self.match(TOK_LPAREN):
+                args = self.args()
+                self.expect(TOK_RPAREN)
+                return FuncCall(identifier.lexeme, args, line=self.previous_token().line)
+            else:
+                return Identifier(identifier.lexeme, line=self.previous_token().line)
 
     # <unary>  ::=  ('+'|'-'|'~') <unary>  |  <primary>
     def unary(self):
@@ -207,6 +212,15 @@ class Parser:
             self.expect(TOK_COMMA)
         return params
 
+    def args(self):
+        args = []
+        while not self.is_next(TOK_RPAREN):
+          arg = self.expr()
+          args.append(arg)
+          if not self.is_next(TOK_RPAREN):
+            self.expect(TOK_COMMA)
+        return args
+
   # <func_decl>  ::=  "func" <name> "(" <params>? ")" <body_stmts> "end"
     def func_decl(self):
         self.expect(TOK_FUNC)
@@ -235,10 +249,12 @@ class Parser:
         else:
             left = self.expr()
             if self.match(TOK_ASSIGN):
+                # handle assignment statement
                 right = self.expr()
                 return Assignment(left, right, line=left.line)
             else:
-                pass
+                # handle function call statement
+                return FuncCallStmt(left)
 
 
 

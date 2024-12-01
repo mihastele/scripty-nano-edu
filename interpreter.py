@@ -230,6 +230,38 @@ class Interpreter:
                     self.interpret(node.body_stmts, block_new_env)
                     i += step
 
+        elif isinstance(node, FuncDecl):
+            env.set_func(node.name, (node, env))
+        elif isinstance(node, FuncCall):
+            # Make sure the function exists
+            func = env.get_func(node.name)
+            if not func:
+                runtime_error(f'Function {node.name} not declared.', node.line)
+
+            # fetch the fucntion declaration
+            func_decl = func[0]
+            func_env = func[1]
+
+            # Does the number of args match the expected number of params?
+            if len(node.args) != len(func_decl.params):
+                runtime_error(f'Function {func_decl.name} expects {len(func_decl.params)} arguments, but got {len(node.args)}.',
+                                node.line)
+            # We need to eval all the args
+            args = []
+            for arg in node.args:
+                # argtype, argval = self.interpret(arg, env)
+                # args.append((argtype, argval))
+                args.append(self.interpret(arg, env))
+            # Proper env
+            new_func_env = func_env.new_env()
+            # We must create local variables in the new child environment of the function for the parameters and bind the args to them
+            for param, argval in zip(func_decl.params, args):
+                print(f'Binding {param.name} to {argval}')  # Debugging purpose only, remove later
+                new_func_env.set_var(param.name, argval)
+            # ask to interpret the body statements of the function declaration
+            self.interpret(func_decl.body_stmts, new_func_env)
+        elif isinstance(node, FuncCallStmt):
+            self.interpret(node.expr, env)
 
     def interpret_ast(self, node):
         # Entrypoint with global environment
