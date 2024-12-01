@@ -6,13 +6,40 @@ func factorial(n)
   for i := 1, n do
     mul := mul * i
   end
-  println("The factorial of " + n + " is " + mul)
+  ret mul
 end
 
--- func factorial_rec(n)
---    if
+func factorial_rec(n)
+    if n <= 1 then
+        ret 1
+    else
+        ret n * factorial (n-1)
+    end
+end
 
-factorial(5)
--- factorial(5, 3 ,4)
--- factorialabc(3)
-factorial(6)
+
+-----------------------------------------------------------
+-- FizzBuzz
+-----------------------------------------------------------
+func fizzbuzz(n)
+  i := 1
+  while i <= n do
+    if i % 3 == 0 and i % 5 == 0 then
+      println "i = " + i + " -> " + "FizzBuzz"
+      -- ret 0
+    else
+      if i %3 == 0 then
+        println "i = " + i + " -> " + "Fizz"
+      end
+      if i % 5 == 0 then
+        println "i = " + i + " -> " + "Buzz"
+      end
+    end
+    i := i + 1
+  end
+end
+
+
+println factorial(5)
+fizzbuzz(30)
+println factorial_rec(6)

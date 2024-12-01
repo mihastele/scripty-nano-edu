@@ -256,14 +256,25 @@ class Interpreter:
             new_func_env = func_env.new_env()
             # We must create local variables in the new child environment of the function for the parameters and bind the args to them
             for param, argval in zip(func_decl.params, args):
-                print(f'Binding {param.name} to {argval}')  # Debugging purpose only, remove later
+                # print(f'Binding {param.name} to {argval}')  # Debugging purpose only, remove later
                 new_func_env.set_var(param.name, argval)
             # ask to interpret the body statements of the function declaration
-            self.interpret(func_decl.body_stmts, new_func_env)
+
+            try:
+                self.interpret(func_decl.body_stmts, new_func_env)
+            except Return as e:
+                return e.args[0]
+
         elif isinstance(node, FuncCallStmt):
             self.interpret(node.expr, env)
+
+        elif isinstance(node, RetStmt):
+            raise Return(self.interpret(node.value, env))
 
     def interpret_ast(self, node):
         # Entrypoint with global environment
         env = Environment()
         self.interpret(node, env)
+
+class Return(Exception):
+    pass

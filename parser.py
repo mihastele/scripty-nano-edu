@@ -236,6 +236,11 @@ class Parser:
         self.expect(TOK_END)
         return FuncDecl(name.lexeme, params, body_stmts, line=self.previous_token().line)
 
+    def ret_stmt(self):
+        self.expect(TOK_RET)
+        expr = self.expr() if not self.is_next(TOK_SEMICOLON) else None
+        return RetStmt(expr, line=self.previous_token().line)
+
     def stmt(self):
         #predictive parsing
         if self.peek().token_type == TOK_PRINT:
@@ -250,6 +255,8 @@ class Parser:
             return self.for_stmt()
         elif self.peek().token_type == TOK_FUNC:
             return self.func_decl()
+        elif self.peek().token_type == TOK_RET:
+            return self.ret_stmt()
         else:
             left = self.expr()
             if self.match(TOK_ASSIGN):
