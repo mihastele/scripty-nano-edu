@@ -22,6 +22,13 @@ class Stmt(Node):
     pass
 
 
+class Decl(Stmt):
+    '''
+    Declarations are statements that declare a new name (functions)
+    "var" <id> "=" <expr> ";"
+    '''
+    pass
+
 class Integer(Expr):
     '''
     Example: 17
@@ -230,8 +237,8 @@ class ForStmt(Stmt):
         self.body_stmts = body_stmts
         self.line = line
 
-        def __repr__(self):
-            return f'ForStmt(ident={self.ident}, start={self.start}, end={self.end}, step={self.step}, body_stmts={self.body_stmts})'
+    def __repr__(self):
+        return f'ForStmt(ident={self.ident}, start={self.start}, end={self.end}, step={self.step}, body_stmts={self.body_stmts})'
 
 class Assignment(Stmt):
     '''
@@ -252,3 +259,46 @@ class Assignment(Stmt):
         return f'Assignment({self.left}, {self.right})'
 
 
+
+class FuncDecl(Decl):
+    '''
+    "func" <identifier> "(" <params>? ")" <body_stmts> "end"
+    '''
+    def __init__(self, name, params, body_stmts, line):
+        assert isinstance(name, str), name
+        assert all(isinstance(param, Param) for param in params), params
+        self.name = name
+        self.params = params
+        self.body_stmts = body_stmts
+        self.line = line
+    def __repr__(self):
+        return f'FuncDecl(name={self.name}, params={self.params}, body_stmts={self.body_stmts})'
+
+class Param(Decl):
+    '''
+    Single function param
+    "(" <param> ")"
+    '''
+    def __init__(self, name, line):
+        assert isinstance(name, str), name
+        self.name = name
+        self.line = line
+    
+    def __repr__(self):
+        return f'Param({self.name})'
+
+# factorial (3)
+# x := max(5, 6)
+# x := y + sin(PI / 2)
+class FuncCall(Expr):
+    '''
+    <name> "(" <args>? ")"
+    <args> ::= <expr> ("," <expr>)*
+    '''
+    def __init__(self, name, args, line):
+        self.name = name
+        self.args = args
+        self.line = line
+    
+    def __repr__(self):
+        return f'FuncCall({self.name}, {self.args})'

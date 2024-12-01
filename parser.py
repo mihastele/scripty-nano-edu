@@ -196,7 +196,27 @@ class Parser:
         body_stmts = self.stmts()
         self.expect(TOK_END)  # Consume the end token. This should be the end of the for loop's body.
         return ForStmt(Identifier, start, end, step, body_stmts, line=self.previous_token().line)
+    
+    # <params>  ::=  <identifier> ("," <identifier> )*
+    def params(self):
+        params = []
+        while not self.is_next(TOK_RPAREN):
+          name = self.expect(TOK_IDENTIFIER)
+          params.append(Param(name.lexeme, line=self.previous_token().line))
+          if not self.is_next(TOK_RPAREN):
+            self.expect(TOK_COMMA)
+        return params
 
+  # <func_decl>  ::=  "func" <name> "(" <params>? ")" <body_stmts> "end"
+    def func_decl(self):
+        self.expect(TOK_FUNC)
+        name = self.expect(TOK_IDENTIFIER)
+        self.expect(TOK_LPAREN)
+        params = self.params()
+        self.expect(TOK_RPAREN)
+        body_stmts = self.stmts()
+        self.expect(TOK_END)
+        return FuncDecl(name.lexeme, params, body_stmts, line=self.previous_token().line)
 
     def stmt(self):
         #predictive parsing
@@ -211,7 +231,7 @@ class Parser:
         elif self.peek().token_type == TOK_FOR:
             return self.for_stmt()
         elif self.peek().token_type == TOK_FUNC:
-            return self.func_stmt()
+            return self.func_decl()
         else:
             left = self.expr()
             if self.match(TOK_ASSIGN):
