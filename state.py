@@ -23,7 +23,7 @@ class Environment:
         original_env.vars[name] = value
         return value  # return the updated value if the variable is not found in any environment
 
-    def set_param_as_local_var(self, name, value):
+    def set_local(self, name, value):
         self.vars[name] = value  # set the parameter as a local variable in the current environment
 
     def get_func(self, name):

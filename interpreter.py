@@ -44,6 +44,13 @@ class Interpreter:
             # varval = env.get_var(node.left.name)
             env.set_var(node.left.name, (righttype, rightval))
 
+        elif isinstance(node, LocalAssignment):
+            # left := right
+            # Eval right
+            righttype, rightval = self.interpret(node.right, env)
+            # Always create a new variable in the current scope
+            env.set_local(node.left.name, (righttype, rightval))
+
 
         elif isinstance(node, BinOp):
             lefttype, leftval = self.interpret(node.left, env)
@@ -257,7 +264,7 @@ class Interpreter:
             # We must create local variables in the new child environment of the function for the parameters and bind the args to them
             for param, argval in zip(func_decl.params, args):
                 # print(f'Binding {param.name} to {argval}')  # Debugging purpose only, remove later
-                new_func_env.set_param_as_local_var(param.name, argval)
+                new_func_env.set_local(param.name, argval)
             # ask to interpret the body statements of the function declaration
 
             try:
