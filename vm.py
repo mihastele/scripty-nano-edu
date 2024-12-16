@@ -64,3 +64,20 @@ class VM:
 
     def run(self, instructions):
         self.is_running = True
+
+        # VM kernel
+        while self.is_running:
+            instruction = instructions[self.pc]
+            self.pc += 1
+            # PC does not always increment by 1 in real processor scenarios
+
+            opcode = instruction[0]
+            args = [instruction[1]] if len(instruction) > 1 else []
+
+            print(opcode, args)
+
+            if opcode == 'HALT':
+                self.is_running = False
+
+    # def HALT(self):
+    #     self.is_running = False
