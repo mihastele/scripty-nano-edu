@@ -4,6 +4,8 @@ from lexer import *
 from parser import *
 from utils import *
 from interpreter import *
+from compiler import *
+from vm import *
 
 VERBOSE = False
 
@@ -26,5 +28,19 @@ if __name__ == "__main__":
             print(f"{Colors.GREEN}Parsed AST:{Colors.WHITE}")
             print_pretty_ast(str(ast))
 
-        interpreter = Interpreter()
-        interpreter.interpret_ast(ast)
+        # interpreter = Interpreter()
+        # interpreter.interpret_ast(ast)
+
+
+        if VERBOSE:
+            print(f"{Colors.GREEN}*******************{Colors.WHITE}")
+            print(f"{Colors.GREEN}Code generation:{Colors.WHITE}")
+            print(f"{Colors.GREEN}*******************{Colors.WHITE}")
+
+        compiler = Compiler()
+        code = compiler.compile_code(ast)
+
+        print(code)
+
+        vm = VM()
+        vm.run(code)

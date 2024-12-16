@@ -60,6 +60,6 @@ class VM:
     self.stack = []
     self.pc = 0
 
-  def execute(self, instructions):
+  def run(self, instructions):
     #TODO:
     pass
