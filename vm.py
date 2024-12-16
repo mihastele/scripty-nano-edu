@@ -56,10 +56,11 @@
 #      ('RTS',)              # Return from subroutine/function
 
 class VM:
-  def __init__(self):
-    self.stack = []
-    self.pc = 0
+    def __init__(self):
+        self.stack = []
+        self.pc = 0
+        self.sp = 0  # Stack pointer
+        self.is_running = False
 
-  def run(self, instructions):
-    #TODO:
-    pass
+    def run(self, instructions):
+        self.is_running = True
