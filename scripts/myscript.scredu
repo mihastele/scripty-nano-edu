@@ -2,3 +2,6 @@
 -- Simple expr
 ---------------------------
 println (2 + 3) * 5 - 1
+println true
+println 1 == 2
+println (3 > 2) or true
