@@ -2,14 +2,8 @@ from utils import *
 from model import *
 from tokens import *
 from state import *
+from definitions import *
 import codecs
-
-###############################################################################
-# Constants for different runtime value types
-###############################################################################
-TYPE_NUMBER = 'TYPE_NUMBER'  # Default to 64-bit float
-TYPE_STRING = 'TYPE_STRING'  # String managed by the host language
-TYPE_BOOL = 'TYPE_BOOL'  # true | false
 
 
 class Interpreter:

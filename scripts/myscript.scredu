@@ -1,5 +1,4 @@
 ---------------------------
 -- Simple expr
 ---------------------------
-println 2 + 42 * 2 - -1 and false
-println ~true
+println 2 + 3 * 5 - 1

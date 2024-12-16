@@ -1,13 +1,7 @@
 from model import *
 from tokens import *
 from utils import *
-
-###############################################################################
-# Constants for different runtime value types
-###############################################################################
-TYPE_NUMBER = 'TYPE_NUMBER'  # Default to 64-bit float
-TYPE_STRING = 'TYPE_STRING'  # String managed by the host language
-TYPE_BOOL = 'TYPE_BOOL'  # true | false
+from definitions import *
 
 
 class Compiler:
@@ -77,6 +71,9 @@ class Compiler:
                 self.emit(('AND',))
             elif node.op.token_type == TOK_OR:
                 self.emit(('OR',))
+
+        elif isinstance(node, Grouping):
+            self.compile(node.value)
 
         elif isinstance(node, PrintStmt):
             self.compile(node.value)

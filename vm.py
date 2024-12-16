@@ -54,6 +54,11 @@
 #      ('JMPZ', name)        # Jump to label name if top of stack is zero (or false)
 #      ('JSR', name)         # Jump to subroutine/function and keep track of the returning PC
 #      ('RTS',)              # Return from subroutine/function
+from interpreter import TYPE_NUMBER
+from definitions import *
+from utils import *
+import codecs
+
 
 class VM:
     def __init__(self):
@@ -67,17 +72,70 @@ class VM:
 
         # VM kernel
         while self.is_running:
-            instruction = instructions[self.pc]
+            opcode, *args = instructions[self.pc]
             self.pc += 1
             # PC does not always increment by 1 in real processor scenarios
+            # print(opcode, args)
+            getattr(self, opcode)(*args)  # --> invoke the method that matched the opcode name
 
-            opcode = instruction[0]
-            args = [instruction[1]] if len(instruction) > 1 else []
+    def LABEL(self, name):
+        pass
 
-            print(opcode, args)
+    def PUSH(self, value):
+        self.stack.append(value)
+        self.sp += 1  # Stack Pointer usually decrements
 
-            if opcode == 'HALT':
-                self.is_running = False
+    def POP(self):
+        self.sp -= 1
+        return self.stack.pop()
 
-    # def HALT(self):
-    #     self.is_running = False
+    def NEG(self):
+        pass
+
+    def ADD(self):
+        # Be careful the order
+        rightT, rightV = self.POP()
+        leftT, leftV = self.POP()  # leftT is the type, leftV is the value
+        if (leftT == TYPE_NUMBER and rightT == TYPE_NUMBER):
+            self.PUSH((TYPE_NUMBER, leftV + rightV))
+        else:
+            vm_error(f'Unsupported operator + between {leftT} and {rightT}.', self.pc)
+        # TODO: String concat!
+
+    def SUB(self):
+        # Be careful the order
+        rightT, rightV = self.POP()
+        leftT, leftV = self.POP()  # leftT is the type, leftV is the value
+        if (leftT == TYPE_NUMBER and rightT == TYPE_NUMBER):
+            self.PUSH((TYPE_NUMBER, leftV - rightV))
+        else:
+            vm_error(f'Unsupported operator - between {leftT} and {rightT}.', self.pc)
+
+    def MUL(self):
+        # Be careful the order
+        rightT, rightV = self.POP()
+        leftT, leftV = self.POP()  # leftT is the type, leftV is the value
+        if (leftT == TYPE_NUMBER and rightT == TYPE_NUMBER):
+            self.PUSH((TYPE_NUMBER, leftV * rightV))
+        else:
+            vm_error(f'Unsupported operator * between {leftT} and {rightT}.', self.pc)
+
+    def DIV(self):
+        # Be careful the order
+        rightT, rightV = self.POP()
+        leftT, leftV = self.POP()  # leftT is the type, leftV is the value
+        if (leftT == TYPE_NUMBER and rightT == TYPE_NUMBER):
+            self.PUSH((TYPE_NUMBER, leftV / rightV))
+        else:
+            vm_error(f'Unsupported operator DIV between {leftT} and {rightT}.', self.pc)
+
+    def PRINT(self):
+        valT, val = self.POP()
+        print(codecs.escape_decode(bytes(str(val), 'utf-8'))[0].decode('utf-8'), end='')
+
+    def PRINTLN(self):
+        valT, val = self.POP()
+        print(codecs.escape_decode(bytes(str(val), 'utf-8'))[0].decode('utf-8'), end='\n')
+
+    def HALT(self):
+        self.is_running = False
