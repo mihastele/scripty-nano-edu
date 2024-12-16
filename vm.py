@@ -83,59 +83,165 @@ class VM:
 
     def PUSH(self, value):
         self.stack.append(value)
-        self.sp += 1  # Stack Pointer usually decrements
+        self.sp = self.sp + 1
 
     def POP(self):
-        self.sp -= 1
+        self.sp = self.sp - 1
         return self.stack.pop()
 
-    def NEG(self):
-        pass
-
     def ADD(self):
-        # Be careful the order
-        rightT, rightV = self.POP()
-        leftT, leftV = self.POP()  # leftT is the type, leftV is the value
-        if (leftT == TYPE_NUMBER and rightT == TYPE_NUMBER):
-            self.PUSH((TYPE_NUMBER, leftV + rightV))
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval + rightval))
+            # TODO: think of string concatenation
         else:
-            vm_error(f'Unsupported operator + between {leftT} and {rightT}.', self.pc)
-        # TODO: String concat!
+            vm_error(f'Error on ADD between {lefttype} and {righttype}.', self.pc - 1)
 
     def SUB(self):
-        # Be careful the order
-        rightT, rightV = self.POP()
-        leftT, leftV = self.POP()  # leftT is the type, leftV is the value
-        if (leftT == TYPE_NUMBER and rightT == TYPE_NUMBER):
-            self.PUSH((TYPE_NUMBER, leftV - rightV))
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval - rightval))
         else:
-            vm_error(f'Unsupported operator - between {leftT} and {rightT}.', self.pc)
+            vm_error(f'Error on SUB between {lefttype} and {righttype}.', self.pc - 1)
 
     def MUL(self):
-        # Be careful the order
-        rightT, rightV = self.POP()
-        leftT, leftV = self.POP()  # leftT is the type, leftV is the value
-        if (leftT == TYPE_NUMBER and rightT == TYPE_NUMBER):
-            self.PUSH((TYPE_NUMBER, leftV * rightV))
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval * rightval))
         else:
-            vm_error(f'Unsupported operator * between {leftT} and {rightT}.', self.pc)
+            vm_error(f'Error on MUL between {lefttype} and {righttype}.', self.pc - 1)
 
     def DIV(self):
-        # Be careful the order
-        rightT, rightV = self.POP()
-        leftT, leftV = self.POP()  # leftT is the type, leftV is the value
-        if (leftT == TYPE_NUMBER and rightT == TYPE_NUMBER):
-            self.PUSH((TYPE_NUMBER, leftV / rightV))
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval / rightval))
         else:
-            vm_error(f'Unsupported operator DIV between {leftT} and {rightT}.', self.pc)
+            vm_error(f'Error on DIV between {lefttype} and {righttype}.', self.pc - 1)
+
+    def EXP(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval ** rightval))
+        else:
+            vm_error(f'Error on EXP between {lefttype} and {righttype}', self.pc - 1)
+
+    def MOD(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval % rightval))
+        else:
+            vm_error(f'Error on MOD between {lefttype} and {righttype}', self.pc - 1)
+
+    def AND(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval & rightval))
+        elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftval & rightval))
+        else:
+            vm_error(f'Error on AND between {lefttype} and {righttype}', self.pc - 1)
+
+    def OR(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval | rightval))
+        elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftval | rightval))
+        else:
+            vm_error(f'Error on OR between {lefttype} and {righttype}', self.pc - 1)
+
+    def XOR(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftval ^ rightval))
+        elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftval ^ rightval))
+        else:
+            vm_error(f'Error on XOR between {lefttype} and {righttype}', self.pc - 1)
+
+    def NEG(self):
+        operandtype, operand = self.POP()
+        if operandtype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, -operand))
+        else:
+            vm_error(f'Error on NEG between {operandtype}', self.pc - 1)
+
+    def LT(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftval < rightval))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftval < rightval))
+        else:
+            vm_error(f'Error on LT between {lefttype} and {righttype}', self.pc - 1)
+
+    def GT(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftval > rightval))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftval > rightval))
+        else:
+            vm_error(f'Error on GT between {lefttype} and {righttype}', self.pc - 1)
+
+    def LE(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftval <= rightval))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftval <= rightval))
+        else:
+            vm_error(f'Error on LE between {lefttype} and {righttype}', self.pc - 1)
+
+    def GE(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftval >= rightval))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftval >= rightval))
+        else:
+            vm_error(f'Error on GE between {lefttype} and {righttype}', self.pc - 1)
+
+    def EQ(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftval == rightval))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftval == rightval))
+        else:
+            vm_error(f'Error on EQ between {lefttype} and {righttype}', self.pc - 1)
+
+    def NE(self):
+        righttype, rightval = self.POP()
+        lefttype, leftval = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftval != rightval))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftval != rightval))
+        else:
+            vm_error(f'Error on NE between {lefttype} and {righttype}', self.pc - 1)
 
     def PRINT(self):
-        valT, val = self.POP()
-        print(codecs.escape_decode(bytes(str(val), 'utf-8'))[0].decode('utf-8'), end='')
+        valtype, val = self.POP()
+        print(codecs.escape_decode(bytes(stringify(val), "utf-8"))[0].decode("utf-8"), end='')
 
     def PRINTLN(self):
-        valT, val = self.POP()
-        print(codecs.escape_decode(bytes(str(val), 'utf-8'))[0].decode('utf-8'), end='\n')
+        valtype, val = self.POP()
+        print(codecs.escape_decode(bytes(stringify(val), "utf-8"))[0].decode("utf-8"), end='\n')
 
     def HALT(self):
         self.is_running = False

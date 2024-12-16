@@ -51,7 +51,7 @@ class Compiler:
                 self.emit(('LE',))
             elif node.op.token_type == TOK_GE:
                 self.emit(('GE',))
-            elif node.op.token_type == TOK_EQ:
+            elif node.op.token_type == TOK_EQEQ:
                 self.emit(('EQ',))
             elif node.op.token_type == TOK_NE:
                 self.emit(('NE',))
