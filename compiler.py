@@ -61,6 +61,11 @@ class Compiler:
       elif node.op.token_type == TOK_NE:
         self.emit(('NE',))
 
+    elif isinstance(node, UnOp):
+      self.compile(node.right)
+      if node.op.token_type == TOK_NOT:
+        self.emit(('NOT',))
+
     elif isinstance(node, PrintStmt):
       self.compile(node.value)
       if node.end == '':
@@ -72,8 +77,22 @@ class Compiler:
       for stmt in node.stmts:
         self.compile(stmt)
 
+  def print_code(self):
+    for instruction in self.code:
+      if instruction[0] == 'LABEL':
+        print(instruction[1] + ':')
+        continue
+      if instruction[0] == 'PUSH':
+        print(f"    {Colors.GREEN}{instruction[0]} {Colors.CYAN}{stringify(instruction[1][1])}{Colors.WHITE}")
+        continue
+      if len(instruction) == 1:
+        print(f"    {Colors.BLUE}{instruction[0]}{Colors.WHITE}")
+      elif len(instruction) == 2:
+        print(f"    {Colors.GREEN}{instruction[0]} {Colors.CYAN}{instruction[1]}{Colors.WHITE}")
+
   def generate_code(self, node):
     self.emit(('LABEL', 'START'))
     self.compile(node)
     self.emit(('HALT',))
     return self.code
+
