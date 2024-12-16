@@ -80,7 +80,7 @@ class Compiler:
   def print_code(self):
     for instruction in self.code:
       if instruction[0] == 'LABEL':
-        print(instruction[1] + ':')
+        print(f"{Colors.RED}{instruction[1]}:{Colors.WHITE}")
         continue
       if instruction[0] == 'PUSH':
         print(f"    {Colors.GREEN}{instruction[0]} {Colors.CYAN}{stringify(instruction[1][1])}{Colors.WHITE}")
