@@ -62,9 +62,20 @@ class Compiler:
         self.emit(('NE',))
 
     elif isinstance(node, UnOp):
+      self.compile(node.operand)
+      if node.op.token_type == TOK_MINUS:
+        self.emit(('NEG',))
+      elif node.op.token_type == TOK_NOT:
+        self.emit(('PUSH', (TYPE_NUMBER, 1)))
+        self.emit(('XOR',))
+
+    elif isinstance(node, LogicalOp):
+      self.compile(node.left)
       self.compile(node.right)
-      if node.op.token_type == TOK_NOT:
-        self.emit(('NOT',))
+      if node.op.token_type == TOK_AND:
+        self.emit(('AND',))
+      elif node.op.token_type == TOK_OR:
+        self.emit(('OR',))
 
     elif isinstance(node, PrintStmt):
       self.compile(node.value)
