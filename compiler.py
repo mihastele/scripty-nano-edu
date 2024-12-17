@@ -61,7 +61,7 @@ class Compiler:
             if node.op.token_type == TOK_MINUS:
                 self.emit(('NEG',))
             elif node.op.token_type == TOK_NOT:
-                self.emit(('PUSH', (TYPE_NUMBER, 1)))
+                self.emit(('PUSH', (TYPE_BOOL, True)))
                 self.emit(('XOR',))
 
         elif isinstance(node, LogicalOp):
