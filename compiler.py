@@ -1,7 +1,7 @@
+from definitions import *
 from model import *
 from tokens import *
 from utils import *
-from definitions import *
 
 
 class Symbol:
@@ -15,14 +15,14 @@ class Compiler:
         self.code = []
         self.locals = []
         self.globals = []
-        self.num_globals = 0
-        self.num_locals = 0
+        self.numglobals = 0
+        self.numlocals = 0
         self.scope_depth = 0
         self.label_counter = 0
 
     def make_label(self):
         self.label_counter += 1
-        return f"LBL{self.label_counter}"
+        return f'LBL{self.label_counter}'
 
     def emit(self, instruction):
         self.code.append(instruction)
@@ -30,14 +30,13 @@ class Compiler:
     def get_symbol(self, name):
         i = 0
         for symbol in self.locals:
-            if symbol.name == name:  # and symbol.depth == self.scope_depth:
-                return symbol, i
+            if symbol.name == name:
+                return (symbol, i)
             i += 1
-
         i = 0
         for symbol in self.globals:
             if symbol.name == name:
-                return symbol, i
+                return (symbol, i)
             i += 1
         return None
 
@@ -46,13 +45,13 @@ class Compiler:
 
     def end_block(self):
         self.scope_depth -= 1
-        i = self.num_locals - 1
-        while self.num_locals > 0 and self.locals[i].depth > self.scope_depth:
+        # Loop and remove all the locals that are "deeper" than the current scope depth
+        i = self.numlocals - 1
+        while self.numlocals > 0 and self.locals[i].depth > self.scope_depth:
             self.emit(('POP',))
             self.locals.pop()
-            self.num_locals -= 1
+            self.numlocals -= 1
             i -= 1
-
 
     def compile(self, node):
         if isinstance(node, Integer):
@@ -125,9 +124,7 @@ class Compiler:
             else:
                 self.emit(('PRINTLN',))
 
-
         elif isinstance(node, IfStmt):
-
             self.compile(node.test)
             then_label = self.make_label()
             else_label = self.make_label()
@@ -158,11 +155,10 @@ class Compiler:
                 if self.scope_depth == 0:
                     self.globals.append(new_symbol)
                     self.emit(('STORE_GLOBAL', new_symbol.name))
-                    self.num_globals += 1
+                    self.numglobals += 1
                 else:
                     self.locals.append(new_symbol)
-                    self.emit(('STORE_LOCAL', self.num_locals))
-                    self.num_locals += 1
+                    self.numlocals += 1
             else:
                 sym, slot = symbol
                 if sym.depth == 0:
@@ -170,16 +166,16 @@ class Compiler:
                 else:
                     self.emit(('STORE_LOCAL', slot))
 
-
         elif isinstance(node, Identifier):
             symbol = self.get_symbol(node.name)
             if not symbol:
-                raise compile_error(f"Undefined variable '{node.name}'", node.line)
-            sym, slot = symbol
-            if sym.depth == 0:
-                self.emit(('LOAD_GLOBAL', sym.name))
+                compile_error(f'Variable {node.name} is not defined.', node.line)
             else:
-                self.emit(('LOAD_LOCAL', slot))
+                sym, slot = symbol
+                if sym.depth == 0:
+                    self.emit(('LOAD_GLOBAL', sym.name))
+                else:
+                    self.emit(('LOAD_LOCAL', slot))
 
     def print_code(self):
         i = 0

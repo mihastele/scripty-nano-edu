@@ -42,10 +42,10 @@
 #
 # Instructions to load and store variables
 #
-#      ('LOAD', name)        # Push a global variable name from memory to the stack
-#      ('STORE, name)        # Save top of the stack into global variable by name
-#      ('LOAD_LOCAL', name)  # Push a local variable name from memory to the stack
-#      ('STORE_LOCAL, name)  # Save top of the stack to local variable by name
+#      ('LOAD_GLOBAL', name) # Push a global variable name from memory to the stack
+#      ('STORE_GLOBAL, name) # Save top of the stack into global variable by name
+#      ('LOAD_LOCAL', slot)  # Push a local variable from a stack slot/index to the top of the stack
+#      ('STORE_LOCAL, slot)  # Save top of the stack to local variable by slot/index
 #
 # Instructions to manage control-flow (if-else, while, etc.)
 #
@@ -54,7 +54,8 @@
 #      ('JMPZ', name)        # Jump to label name if top of stack is zero (or false)
 #      ('JSR', name)         # Jump to subroutine/function and keep track of the returning PC
 #      ('RTS',)              # Return from subroutine/function
-from interpreter import TYPE_NUMBER
+#      ('HALT',)             # Halt/stops the execution
+
 from definitions import *
 from utils import *
 import codecs
@@ -64,9 +65,9 @@ class VM:
     def __init__(self):
         self.stack = []
         self.labels = {}
-        self.globals = {}  # Global variables
+        self.globals = {}
         self.pc = 0
-        self.sp = 0  # Stack pointer
+        self.sp = 0
         self.is_running = False
 
     def create_label_table(self, instructions):
@@ -79,42 +80,17 @@ class VM:
             pc += 1
 
     def run(self, instructions):
+        self.pc = 0
+        self.sp = 0
         self.is_running = True
 
-        # generate a dict with label names and their corresponding PC positions
+        # Generate a dict with label names and their corresponding PC positions/addresses in the code
         self.create_label_table(instructions)
 
-        # VM kernel
         while self.is_running:
             opcode, *args = instructions[self.pc]
-            self.pc += 1
-            # PC does not always increment by 1 in real processor scenarios
-            # print(opcode, args)
-            getattr(self, opcode)(*args)  # --> invoke the method that matched the opcode name
-
-    def LABEL(self, name):
-        pass
-
-    def JMP(self, label):
-        self.pc = self.labels[label]
-
-    def JMPZ(self, label):
-        # if self.POP() == (TYPE_NUMBER, 0):
-        valT, val = self.POP()
-        if val == 0 or val == False:
-            self.pc = self.labels[label]
-
-    def STORE_GLOBAL(self, name):
-        self.globals[name] = self.POP()
-
-    def LOAD_GLOBAL(self, name):
-        self.PUSH(self.globals[name])
-
-    def LOAD_LOCAL(self, slot):
-        self.PUSH(self.stack[slot])
-
-    def STORE_LOCAL(self, slot):
-        self.stack[slot] = self.POP()
+            self.pc = self.pc + 1
+            getattr(self, opcode)(*args)  # --> invoke the method that matches the opcode name
 
     def PUSH(self, value):
         self.stack.append(value)
@@ -129,7 +105,7 @@ class VM:
         lefttype, leftval = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_NUMBER, leftval + rightval))
-        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+        elif lefttype == TYPE_STRING or righttype == TYPE_STRING:
             self.PUSH((TYPE_STRING, stringify(leftval) + stringify(rightval)))
         else:
             vm_error(f'Error on ADD between {lefttype} and {righttype}.', self.pc - 1)
@@ -256,9 +232,9 @@ class VM:
         lefttype, leftval = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_BOOL, leftval == rightval))
-        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
-            self.PUSH((TYPE_BOOL, leftval == rightval))
         elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftval == rightval))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
             self.PUSH((TYPE_BOOL, leftval == rightval))
         else:
             vm_error(f'Error on EQ between {lefttype} and {righttype}', self.pc - 1)
@@ -268,9 +244,9 @@ class VM:
         lefttype, leftval = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_BOOL, leftval != rightval))
-        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
-            self.PUSH((TYPE_BOOL, leftval != rightval))
         elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftval != rightval))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
             self.PUSH((TYPE_BOOL, leftval != rightval))
         else:
             vm_error(f'Error on NE between {lefttype} and {righttype}', self.pc - 1)
@@ -282,6 +258,29 @@ class VM:
     def PRINTLN(self):
         valtype, val = self.POP()
         print(codecs.escape_decode(bytes(stringify(val), "utf-8"))[0].decode("utf-8"), end='\n')
+
+    def LABEL(self, name):
+        pass
+
+    def JMP(self, label):
+        self.pc = self.labels[label]
+
+    def JMPZ(self, label):
+        valtype, val = self.POP()
+        if val == 0 or val == False:
+            self.pc = self.labels[label]
+
+    def STORE_GLOBAL(self, name):
+        self.globals[name] = self.POP()
+
+    def LOAD_GLOBAL(self, name):
+        self.PUSH(self.globals[name])
+
+    def LOAD_LOCAL(self, slot):
+        self.PUSH(self.stack[slot])
+
+    def STORE_LOCAL(self, slot):
+        self.stack[slot] = self.POP()
 
     def HALT(self):
         self.is_running = False
