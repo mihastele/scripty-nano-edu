@@ -63,12 +63,25 @@ import codecs
 class VM:
     def __init__(self):
         self.stack = []
+        self.labels = {}
         self.pc = 0
         self.sp = 0  # Stack pointer
         self.is_running = False
 
+    def create_label_table(self, instructions):
+        self.labels = {}
+        pc = 0
+        for instruction in instructions:
+            opcode, *args = instruction
+            if opcode == 'LABEL':
+                self.labels.update({args[0]: pc})
+            pc += 1
+
     def run(self, instructions):
         self.is_running = True
+
+        # generate a dict with label names and their corresponding PC positions
+        self.create_label_table(instructions)
 
         # VM kernel
         while self.is_running:
@@ -80,6 +93,15 @@ class VM:
 
     def LABEL(self, name):
         pass
+
+    def JMP(self, label):
+        self.pc = self.labels[label]
+
+    def JMPZ(self, label):
+        # if self.POP() == (TYPE_NUMBER, 0):
+        valT, val = self.POP()
+        if val == 0 or val == False:
+            self.pc = self.labels[label]
 
     def PUSH(self, value):
         self.stack.append(value)
@@ -94,7 +116,8 @@ class VM:
         lefttype, leftval = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_NUMBER, leftval + rightval))
-            # TODO: think of string concatenation
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_STRING, stringify(leftval) + stringify(rightval)))
         else:
             vm_error(f'Error on ADD between {lefttype} and {righttype}.', self.pc - 1)
 
@@ -222,6 +245,8 @@ class VM:
             self.PUSH((TYPE_BOOL, leftval == rightval))
         elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
             self.PUSH((TYPE_BOOL, leftval == rightval))
+        elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftval == rightval))
         else:
             vm_error(f'Error on EQ between {lefttype} and {righttype}', self.pc - 1)
 
@@ -231,6 +256,8 @@ class VM:
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_BOOL, leftval != rightval))
         elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftval != rightval))
+        elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
             self.PUSH((TYPE_BOOL, leftval != rightval))
         else:
             vm_error(f'Error on NE between {lefttype} and {righttype}', self.pc - 1)

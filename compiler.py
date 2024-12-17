@@ -7,6 +7,11 @@ from definitions import *
 class Compiler:
     def __init__(self):
         self.code = []
+        self.label_counter = 0
+
+    def make_label(self):
+        self.label_counter += 1
+        return f"LBL{self.label_counter}"
 
     def emit(self, instruction):
         self.code.append(instruction)
@@ -82,22 +87,44 @@ class Compiler:
             else:
                 self.emit(('PRINTLN',))
 
+
+        elif isinstance(node, IfStmt):
+
+            self.compile(node.test)
+            then_label = self.make_label()
+            else_label = self.make_label()
+            exit_label = self.make_label()
+            self.emit(
+                ('JMPZ', else_label))  # Branch directly to else_label if top of stack is EQUAL to ZERO (a.k.a. False)
+            self.emit(('LABEL', then_label))
+            self.compile(node.then_stmts)
+            self.emit(('JMP', exit_label))
+            self.emit(('LABEL', else_label))
+            if node.else_stmts:
+                self.compile(node.else_stmts)
+            self.emit(('LABEL', exit_label))
+
         elif isinstance(node, Stmts):
             for stmt in node.stmts:
                 self.compile(stmt)
 
     def print_code(self):
+        i = 0
         for instruction in self.code:
             if instruction[0] == 'LABEL':
-                print(f"{Colors.RED}{instruction[1]}:{Colors.WHITE}")
+                print(f"{i:08} {Colors.RED}{instruction[1]}:{Colors.WHITE}")
+                i += 1
                 continue
             if instruction[0] == 'PUSH':
-                print(f"    {Colors.GREEN}{instruction[0]} {Colors.CYAN}{stringify(instruction[1][1])}{Colors.WHITE}")
+                print(
+                    f"{i:08}     {Colors.GREEN}{instruction[0]} {Colors.CYAN}{stringify(instruction[1][1])}{Colors.WHITE}")
+                i += 1
                 continue
             if len(instruction) == 1:
-                print(f"    {Colors.BLUE}{instruction[0]}{Colors.WHITE}")
+                print(f"{i:08}     {Colors.BLUE}{instruction[0]}{Colors.WHITE}")
             elif len(instruction) == 2:
-                print(f"    {Colors.GREEN}{instruction[0]} {Colors.CYAN}{instruction[1]}{Colors.WHITE}")
+                print(f"{i:08}     {Colors.GREEN}{instruction[0]} {Colors.CYAN}{instruction[1]}{Colors.WHITE}")
+            i += 1
 
     def generate_code(self, node):
         self.emit(('LABEL', 'START'))
