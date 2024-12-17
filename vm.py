@@ -64,6 +64,7 @@ class VM:
     def __init__(self):
         self.stack = []
         self.labels = {}
+        self.globals = {}  # Global variables
         self.pc = 0
         self.sp = 0  # Stack pointer
         self.is_running = False
@@ -102,6 +103,12 @@ class VM:
         valT, val = self.POP()
         if val == 0 or val == False:
             self.pc = self.labels[label]
+
+    def STORE_GLOBAL(self, name):
+        self.globals[name] = self.POP()
+
+    def LOAD_GLOBAL(self, name):
+        self.PUSH(self.globals[name])
 
     def PUSH(self, value):
         self.stack.append(value)

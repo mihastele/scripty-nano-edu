@@ -3,10 +3,17 @@ from tokens import *
 from utils import *
 from definitions import *
 
+class Symbol:
+    def __init__(self, name):
+        self.name = name
+        # self.type = None
+        # self.offset = None
 
 class Compiler:
     def __init__(self):
         self.code = []
+        self.globals = []
+        self.num_globals = 0
         self.label_counter = 0
 
     def make_label(self):
@@ -15,6 +22,12 @@ class Compiler:
 
     def emit(self, instruction):
         self.code.append(instruction)
+
+    def get_symbol(self, name):
+        for symbol in self.globals:
+            if symbol.name == name:
+                return symbol
+        return None
 
     def compile(self, node):
         if isinstance(node, Integer):
@@ -107,6 +120,24 @@ class Compiler:
         elif isinstance(node, Stmts):
             for stmt in node.stmts:
                 self.compile(stmt)
+
+        elif isinstance(node, Assignment):
+            self.compile(node.right)
+            symbol = self.get_symbol(node.left.name)
+            if not symbol:
+                new_symbol = Symbol(node.left.name)
+                self.globals.append(new_symbol)
+                self.emit(('STORE_GLOBAL', new_symbol.name))
+                self.num_globals += 1
+            else:
+                self.emit(('STORE_GLOBAL', symbol.name))
+
+
+        elif isinstance(node, Identifier):
+            symbol = self.get_symbol(node.name)
+            if not symbol:
+                raise compile_error(f"Undefined variable '{node.name}'", node.line)
+            self.emit(('LOAD_GLOBAL', symbol.name))
 
     def print_code(self):
         i = 0

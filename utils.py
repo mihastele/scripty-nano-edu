@@ -47,6 +47,10 @@ def vm_error(message, pc):
     print(f"{Colors.RED}Error at program counter {pc}: {message}{Colors.WHITE}")
     sys.exit(1)
 
+def compile_error(message, lineno):
+    print(f"{Colors.RED}Error at program counter {lineno}: {message}{Colors.WHITE}")
+    sys.exit(1)
+
 class Colors:
     WHITE = '\033[0m'
     BLUE = '\033[94m'

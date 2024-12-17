@@ -1,15 +1,10 @@
----------------------------
--- Simple expr
----------------------------
-println (2 + 3) * 5 - 1
-println true
-println 1 == 2
-println ~(3 > 2) or true
+x := 100
+y := 200
+z := 300
 
-if 3 >= 0 then
-    println "Entered the consequence block"
-else
-    println "Entered the alternative block"
-end
+println(x)
+println(y)
+println(z)
 
-println "Goodbye"
+a := x + 1
+println(a)
