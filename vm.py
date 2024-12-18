@@ -287,6 +287,10 @@ class VM:
         self.pc = self.labels[label]  # <- JumptoSubRoutine
 
     def RTS(self):
+        result = self.stack[self.sp - 1]
+        while self.sp > self.frames[-1].fp:
+            self.POP()
+        self.PUSH(result)
         self.pc = self.frames.pop().ret_pc
 
     def LOAD_GLOBAL(self, slot):
