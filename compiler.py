@@ -20,7 +20,6 @@ class Compiler:
         self.code = []
         self.locals = []
         self.globals = []
-        # functions will be symbols with names
         self.functions = []
         self.scope_depth = 0
         self.label_counter = 0
@@ -33,15 +32,17 @@ class Compiler:
         self.code.append(instruction)
 
     def get_func_symbol(self, name):
+        # Loop the function list trying to find the first occurrence of that symbol name
         for symbol in reversed(self.functions):
             if symbol.name == name:
                 return symbol
-        return None
 
     def get_var_symbol(self, name):
+        # Loop the locals list in reversed order, trying to find the first occurrence of that symbol name
         for index, symbol in reversed(list(enumerate(self.locals))):
             if symbol.name == name:
                 return (symbol, index)
+        # Loop the globals list in reversed order, trying to find the first occurrence of that symbol name
         for index, symbol in reversed(list(enumerate(self.globals))):
             if symbol.name == name:
                 return (symbol, index)
@@ -172,14 +173,13 @@ class Compiler:
             self.compile(node.right)
             symbol = self.get_var_symbol(node.left.name)
             if not symbol:
-                new_symbol = Symbol(node.left.name, SYM_VAR, self.scope_depth)
+                new_symbol = Symbol(node.left.name, symtype=SYM_VAR, depth=self.scope_depth)
                 if self.scope_depth == 0:
                     self.globals.append(new_symbol)
                     new_global_slot = len(self.globals) - 1
                     self.emit(('STORE_GLOBAL', new_global_slot))
                 else:
                     self.locals.append(new_symbol)
-                    # visual helper SET_SLOT, it does nothing in VM
                     self.emit(('SET_SLOT', str(len(self.locals) - 1) + f" ({new_symbol.name})"))
             else:
                 sym, slot = symbol
@@ -203,40 +203,43 @@ class Compiler:
             var = self.get_var_symbol(node.name)
             func = self.get_func_symbol(node.name)
             if func:
-                compile_error(f'Function {node.name} is already defined.', node.line)
+                compile_error(f'A function with the name {node.name} was already declared.', node.line)
             if var:
-                compile_error(f'Variable {node.name} shadows function.', node.line)
-            new_func = Symbol(node.name, SYM_FUNC, self.scope_depth, arity=len(node.params))
+                compile_error(f'A variable with the name {node.name} was already defined in this scope.', node.line)
+            new_func = Symbol(node.name, symtype=SYM_FUNC, depth=self.scope_depth, arity=len(node.params))
             self.functions.append(new_func)
 
             end_label = self.make_label()
             self.emit(('JMP', end_label))
             self.emit(('LABEL', new_func.name))
             self.begin_block()
-
+            # Set params as local variables
             for param in node.params:
-                new_symbol = Symbol(param.name, SYM_VAR, self.scope_depth)
+                new_symbol = Symbol(name=param.name, symtype=SYM_VAR, depth=self.scope_depth)
                 self.locals.append(new_symbol)
-                self.emit(('SET_SLOT', str(len(self.locals) - 1) + f" ({new_symbol.name})"))
-
+                self.emit(('SET_SLOT', str(len(self.locals) - 1) + " (" + str(new_symbol.name) + ")"))
             self.compile(node.body_stmts)
             self.end_block()
+            self.emit(('PUSH', (TYPE_NUMBER, 0)))
             self.emit(('RTS',))
             self.emit(('LABEL', end_label))
-
 
         elif isinstance(node, FuncCall):
             func = self.get_func_symbol(node.name)
             if not func:
-                compile_error(f'Function {node.name} is not defined.', node.line)
+                compile_error(f'Not found declaration for function {node.name}', node.line)
             if func.arity != len(node.args):
-                compile_error(f'Function {node.name} expects {func.arity} arguments, but received {len(node.args)}.',
-                              node.line)
+                compile_error(f'Function expected {func.arity} params but {len(node.args)} args were passed', node.line)
+            # Evaluate all args
             for arg in node.args:
-                # push arguments to stack
                 self.compile(arg)
-            self.emit(('PUSH', (TYPE_NUMBER, len(node.args))))
+            numargs = (TYPE_NUMBER, len(node.args))
+            self.emit(('PUSH', numargs))
             self.emit(('JSR', node.name))
+
+        elif isinstance(node, RetStmt):
+            self.compile(node.value)
+            self.emit(('RTS',))
 
         elif isinstance(node, FuncCallStmt):
             self.compile(node.expr)

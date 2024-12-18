@@ -47,3 +47,13 @@ println "Goodbye!"
 --> 5
 --> 8
 
+
+func mul(a,b)
+    ret a*b
+end
+
+func add(a, b)
+    ret a + mul(b, 5)
+end
+
+println add(5, 8)
