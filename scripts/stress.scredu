@@ -27,7 +27,7 @@ func bar(a)
 end
 
 func foo(a)
-  local x := 5
+  local x := 5 + say("test123")
   bar(a)
   say(x)
 end
