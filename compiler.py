@@ -219,7 +219,7 @@ class Compiler:
 
 
         elif isinstance(node, FuncCall):
-            pass
+            self.emit(('JSR', node.name))
 
         elif isinstance(node, FuncCallStmt):
             self.compile(node.expr)
