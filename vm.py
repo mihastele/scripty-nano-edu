@@ -68,6 +68,7 @@ class Frame:
         # fp - frame pointer
         self.fp = fp
 
+
 class VM:
     def __init__(self):
         self.stack = []
@@ -279,9 +280,11 @@ class VM:
             self.pc = self.labels[label]
 
     def JSR(self, label):
-        new_frame = Frame(name=label, ret_pc=self.pc, fp=self.sp)
+        _, numargs = self.POP() # we don't need the type
+        base_pointer = self.sp - numargs
+        new_frame = Frame(name=label, ret_pc=self.pc, fp=base_pointer)
         self.frames.append(new_frame)
-        self.pc = self.labels[label] # <- JumptoSubRoutine
+        self.pc = self.labels[label]  # <- JumptoSubRoutine
 
     def RTS(self):
         self.pc = self.frames.pop().ret_pc
@@ -293,9 +296,13 @@ class VM:
         self.globals[slot] = self.POP()
 
     def LOAD_LOCAL(self, slot):
+        if len(self.frames) > 0:
+            slot += self.frames[-1].fp
         self.PUSH(self.stack[slot])
 
     def STORE_LOCAL(self, slot):
+        if len(self.frames) > 0:
+            slot += self.frames[-1].fp
         self.stack[slot] = self.POP()
 
     def SET_SLOT(self, slot):

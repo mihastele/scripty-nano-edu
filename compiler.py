@@ -233,7 +233,9 @@ class Compiler:
                 compile_error(f'Function {node.name} expects {func.arity} arguments, but received {len(node.args)}.',
                               node.line)
             for arg in node.args:
+                # push arguments to stack
                 self.compile(arg)
+            self.emit(('PUSH', (TYPE_NUMBER, len(node.args))))
             self.emit(('JSR', node.name))
 
         elif isinstance(node, FuncCallStmt):

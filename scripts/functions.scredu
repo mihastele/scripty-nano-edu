@@ -17,3 +17,25 @@ println "Goodbye!"
 --end
 
 --error("1 argument")
+
+
+func func_3(x,y)
+    result := x + y
+end
+
+func func_2(x,y)
+    result := x + y
+    func_3(7, 9 + y)
+    println result
+end
+
+func func_1(a,b,c)
+    println a
+    println b
+    func_2(2,3)
+    println c
+end
+
+func_1(1 + 2, 2 + 3, 3 + x)
+
+println "Goodbye"
