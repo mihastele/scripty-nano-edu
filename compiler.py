@@ -3,15 +3,16 @@ from model import *
 from tokens import *
 from utils import *
 
-
 SYM_VAR = 'SYM_VAR'
 SYM_FUNC = 'SYM_FUNC'
 
+
 class Symbol:
-    def __init__(self, name, symtype=SYM_VAR, depth=0):
+    def __init__(self, name, symtype=SYM_VAR, depth=0, arity=0):
         self.name = name
         self.depth = depth
         self.symtype = symtype
+        self.arity = arity
 
 
 class Compiler:
@@ -205,13 +206,19 @@ class Compiler:
                 compile_error(f'Function {node.name} is already defined.', node.line)
             if var:
                 compile_error(f'Variable {node.name} shadows function.', node.line)
-            new_func = Symbol(node.name, SYM_FUNC, self.scope_depth)
+            new_func = Symbol(node.name, SYM_FUNC, self.scope_depth, arity=len(node.params))
             self.functions.append(new_func)
 
             end_label = self.make_label()
             self.emit(('JMP', end_label))
             self.emit(('LABEL', new_func.name))
             self.begin_block()
+
+            for param in node.params:
+                new_symbol = Symbol(param.name, SYM_VAR, self.scope_depth)
+                self.locals.append(new_symbol)
+                self.emit(('SET_SLOT', str(len(self.locals) - 1) + f" ({new_symbol.name})"))
+
             self.compile(node.body_stmts)
             self.end_block()
             self.emit(('RTS',))
@@ -219,11 +226,18 @@ class Compiler:
 
 
         elif isinstance(node, FuncCall):
+            func = self.get_func_symbol(node.name)
+            if not func:
+                compile_error(f'Function {node.name} is not defined.', node.line)
+            if func.arity != len(node.args):
+                compile_error(f'Function {node.name} expects {func.arity} arguments, but received {len(node.args)}.',
+                              node.line)
+            for arg in node.args:
+                self.compile(arg)
             self.emit(('JSR', node.name))
 
         elif isinstance(node, FuncCallStmt):
             self.compile(node.expr)
-
 
     def print_code(self):
         i = 0

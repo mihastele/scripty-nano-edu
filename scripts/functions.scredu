@@ -1,9 +1,19 @@
-x := 0
+x := 5
 
-func say()
-    println 'Hello!'
-    println 'Hello1!'
-    println 'Hello2!'
+func say(a, b, c)
+    println a
+    println b
+    println c
 end
 
-say()
+say("a", "b", 1 + 2 + x)
+
+println "Goodbye!"
+
+
+--func error(a, b)
+--    println a
+--    println b
+--end
+
+--error("1 argument")
