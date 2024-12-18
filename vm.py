@@ -42,8 +42,8 @@
 #
 # Instructions to load and store variables
 #
-#      ('LOAD_GLOBAL', name) # Push a global variable name from memory to the stack
-#      ('STORE_GLOBAL, name) # Save top of the stack into global variable by name
+#      ('LOAD_GLOBAL', slot) # Push a global variable from memory to the stack (identified by an index/slot)
+#      ('STORE_GLOBAL, slot) # Save top of the stack into global variable (identified by an index/slot)
 #      ('LOAD_LOCAL', slot)  # Push a local variable from a stack slot/index to the top of the stack
 #      ('STORE_LOCAL, slot)  # Save top of the stack to local variable by slot/index
 #
@@ -61,9 +61,16 @@ from utils import *
 import codecs
 
 
+class Frame:
+    def __init__(self, ret_pc, fp):
+        self.ret_pc = ret_pc
+        # fp - frame pointer
+        self.fp = fp
+
 class VM:
     def __init__(self):
         self.stack = []
+        self.frames = []
         self.labels = {}
         self.globals = {}
         self.pc = 0
@@ -270,17 +277,20 @@ class VM:
         if val == 0 or val == False:
             self.pc = self.labels[label]
 
-    def STORE_GLOBAL(self, name):
-        self.globals[name] = self.POP()
+    def LOAD_GLOBAL(self, slot):
+        self.PUSH(self.globals[slot])
 
-    def LOAD_GLOBAL(self, name):
-        self.PUSH(self.globals[name])
+    def STORE_GLOBAL(self, slot):
+        self.globals[slot] = self.POP()
 
     def LOAD_LOCAL(self, slot):
         self.PUSH(self.stack[slot])
 
     def STORE_LOCAL(self, slot):
         self.stack[slot] = self.POP()
+
+    def SET_SLOT(self, slot):
+        pass
 
     def HALT(self):
         self.is_running = False

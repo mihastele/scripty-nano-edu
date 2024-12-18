@@ -4,10 +4,14 @@ from tokens import *
 from utils import *
 
 
+SYM_VAR = 'SYM_VAR'
+SYM_FUNC = 'SYM_FUNC'
+
 class Symbol:
-    def __init__(self, name, depth=0):
+    def __init__(self, name, symtype=SYM_VAR, depth=0):
         self.name = name
         self.depth = depth
+        self.symtype = symtype
 
 
 class Compiler:
@@ -15,8 +19,8 @@ class Compiler:
         self.code = []
         self.locals = []
         self.globals = []
-        self.numglobals = 0
-        self.numlocals = 0
+        # functions will be symbols with names
+        self.functions = []
         self.scope_depth = 0
         self.label_counter = 0
 
@@ -27,17 +31,19 @@ class Compiler:
     def emit(self, instruction):
         self.code.append(instruction)
 
-    def get_symbol(self, name):
-        i = 0
-        for symbol in self.locals:
+    def get_func_symbol(self, name):
+        for symbol in reversed(self.functions):
             if symbol.name == name:
-                return (symbol, i)
-            i += 1
-        i = 0
-        for symbol in self.globals:
+                return symbol
+        return None
+
+    def get_var_symbol(self, name):
+        for index, symbol in reversed(list(enumerate(self.locals))):
             if symbol.name == name:
-                return (symbol, i)
-            i += 1
+                return (symbol, index)
+        for index, symbol in reversed(list(enumerate(self.globals))):
+            if symbol.name == name:
+                return (symbol, index)
         return None
 
     def begin_block(self):
@@ -46,11 +52,10 @@ class Compiler:
     def end_block(self):
         self.scope_depth -= 1
         # Loop and remove all the locals that are "deeper" than the current scope depth
-        i = self.numlocals - 1
-        while self.numlocals > 0 and self.locals[i].depth > self.scope_depth:
+        i = len(self.locals) - 1
+        while len(self.locals) > 0 and self.locals[i].depth > self.scope_depth:
             self.emit(('POP',))
             self.locals.pop()
-            self.numlocals -= 1
             i -= 1
 
     def compile(self, node):
@@ -143,39 +148,82 @@ class Compiler:
                 self.end_block()
             self.emit(('LABEL', exit_label))
 
+        elif isinstance(node, WhileStmt):
+            test_label = self.make_label()
+            body_label = self.make_label()
+            exit_label = self.make_label()
+            self.emit(('LABEL', test_label))
+            self.compile(node.test)
+            self.emit(
+                ('JMPZ', exit_label))  # Branch directly to exit_label if top of stack is EQUAL to ZERO (a.k.a. False)
+            self.emit(('LABEL', body_label))
+            self.begin_block()
+            self.compile(node.body_stmts)
+            self.end_block()
+            self.emit(('JMP', test_label))
+            self.emit(('LABEL', exit_label))
+
         elif isinstance(node, Stmts):
             for stmt in node.stmts:
                 self.compile(stmt)
 
         elif isinstance(node, Assignment):
             self.compile(node.right)
-            symbol = self.get_symbol(node.left.name)
+            symbol = self.get_var_symbol(node.left.name)
             if not symbol:
-                new_symbol = Symbol(node.left.name, self.scope_depth)
+                new_symbol = Symbol(node.left.name, SYM_VAR, self.scope_depth)
                 if self.scope_depth == 0:
                     self.globals.append(new_symbol)
-                    self.emit(('STORE_GLOBAL', new_symbol.name))
-                    self.numglobals += 1
+                    new_global_slot = len(self.globals) - 1
+                    self.emit(('STORE_GLOBAL', new_global_slot))
                 else:
                     self.locals.append(new_symbol)
-                    self.numlocals += 1
+                    # visual helper SET_SLOT, it does nothing in VM
+                    self.emit(('SET_SLOT', str(len(self.locals) - 1) + f" ({new_symbol.name})"))
             else:
                 sym, slot = symbol
                 if sym.depth == 0:
-                    self.emit(('STORE_GLOBAL', sym.name))
+                    self.emit(('STORE_GLOBAL', slot))
                 else:
                     self.emit(('STORE_LOCAL', slot))
 
         elif isinstance(node, Identifier):
-            symbol = self.get_symbol(node.name)
+            symbol = self.get_var_symbol(node.name)
             if not symbol:
                 compile_error(f'Variable {node.name} is not defined.', node.line)
             else:
                 sym, slot = symbol
                 if sym.depth == 0:
-                    self.emit(('LOAD_GLOBAL', sym.name))
+                    self.emit(('LOAD_GLOBAL', slot))
                 else:
                     self.emit(('LOAD_LOCAL', slot))
+
+        elif isinstance(node, FuncDecl):
+            var = self.get_var_symbol(node.name)
+            func = self.get_func_symbol(node.name)
+            if func:
+                compile_error(f'Function {node.name} is already defined.', node.line)
+            if var:
+                compile_error(f'Variable {node.name} shadows function.', node.line)
+            new_func = Symbol(node.name, SYM_FUNC, self.scope_depth)
+            self.functions.append(new_func)
+
+            end_label = self.make_label()
+            self.emit(('JMP', end_label))
+            self.emit(('LABEL', new_func.name))
+            self.begin_block()
+            self.compile(node.body_stmts)
+            self.end_block()
+            self.emit(('RTS',))
+            self.emit(('LABEL', end_label))
+
+
+        elif isinstance(node, FuncCall):
+            pass
+
+        elif isinstance(node, FuncCallStmt):
+            self.compile(node.expr)
+
 
     def print_code(self):
         i = 0
