@@ -188,6 +188,12 @@ class Compiler:
                 else:
                     self.emit(('STORE_LOCAL', slot))
 
+        elif isinstance(node, LocalAssignment):
+            self.compile(node.right)
+            new_symbol = Symbol(node.left.name, symtype=SYM_VAR, depth=self.scope_depth)
+            self.locals.append(new_symbol)
+            self.emit(('SET_SLOT', str(len(self.locals) - 1) + " (" + str(new_symbol.name) + ")"))
+
         elif isinstance(node, Identifier):
             symbol = self.get_var_symbol(node.name)
             if not symbol:
@@ -243,6 +249,7 @@ class Compiler:
 
         elif isinstance(node, FuncCallStmt):
             self.compile(node.expr)
+            self.emit(('POP',)) # Pop unused return value since it is a statement not an expression
 
     def print_code(self):
         i = 0

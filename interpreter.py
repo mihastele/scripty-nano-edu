@@ -263,6 +263,7 @@ class Interpreter:
 
             try:
                 self.interpret(func_decl.body_stmts, new_func_env)
+                return (TYPE_NUMBER, 0)
             except Return as e:
                 return e.args[0]
 
